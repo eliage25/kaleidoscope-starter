@@ -2,10 +2,9 @@
 let brushSize = 3;
 let ink = '#7b1ed3';
 let gestureColor = "";
-let wasMousePressed = false;
 let segments = 10;
 let fadeBackground = [15, 15, 10];
-let adjustingSymmetry = false;
+let drawingOnCanvas = false;
 
 function setup() { 
   // cunvas o full available spase in the window
@@ -14,18 +13,19 @@ function setup() {
   strokeCap(ROUND);
   angleMode(DEGREES);
 
-  const symmetrySlider = document.getElementById('symmetry-slider');
-  const symmetryControl = document.querySelector('.symmetry-control');
-  const symmetryValue = document.getElementById('symmetry-value');
-  symmetryControl.addEventListener('pointerdown', () => {
-    adjustingSymmetry = true;
+  const canvas = document.querySelector('canvas');
+  canvas.addEventListener('pointerdown', () => {
+    drawingOnCanvas = true;
   });
   window.addEventListener('pointerup', () => {
-    adjustingSymmetry = false;
+    drawingOnCanvas = false;
   });
   window.addEventListener('pointercancel', () => {
-    adjustingSymmetry = false;
+    drawingOnCanvas = false;
   });
+
+  const symmetrySlider = document.getElementById('symmetry-slider');
+  const symmetryValue = document.getElementById('symmetry-value');
   symmetrySlider.addEventListener('input', () => {
     segments = Number(symmetrySlider.value);
     symmetryValue.value = segments;
@@ -39,64 +39,79 @@ function draw() {
   fill(fadeBackground[0], fadeBackground[1], fadeBackground[2], fadeAmount);
   rect(0, 0, width, height);
   pop();
+}
 
-  const insideCanvas = mouseX >= 0 && mouseX < width &&
-    mouseY >= 0 && mouseY < height &&
-    pmouseX >= 0 && pmouseX < width &&
-    pmouseY >= 0 && pmouseY < height;
-
-  // Draw only while dragging inside the canvas.
-  if (mouseIsPressed && !adjustingSymmetry && insideCanvas) {
-    if (!wasMousePressed) {
-      gestureColor = color(random(255), random(255), random(255));
-    }
-
-    translate(width / 2, height / 2);
-
-    const offsetX = mouseX - width / 2;
-    const offsetY = mouseY - height / 2;
-    const prevOffsetX = pmouseX - width / 2;
-    const prevOffsetY = pmouseY - height / 2;
-
-    stroke(gestureColor);
-    strokeWeight(brushSize);
-
-    const dx = offsetX - prevOffsetX;
-    const dy = offsetY - prevOffsetY;
-    const distance = sqrt(dx * dx + dy * dy);
-    const speed = min(distance, 35) / 35;
-    const circleSize = map(speed, 0, 1, 40, 5, true);
-    const spacing = max(18, circleSize * 1.7);
-    const steps = max(1, floor(distance / spacing));
-
-    for (let i = 0; i < segments; i++) {
-      push();
-      rotate(360 / segments * i);
-
-      const mirroredX = -offsetX;
-      const mirroredPX = -prevOffsetX;
-      const accentDistance = min(width, height) * 0.18;
-
-      line(prevOffsetX, prevOffsetY, offsetX, offsetY);
-      line(mirroredPX, prevOffsetY, mirroredX, offsetY);
-
-      noFill();
-      stroke(red(gestureColor), green(gestureColor), blue(gestureColor), 70);
-
-      for (let s = 0; s <= steps; s++) {
-        const t = s / max(1, steps);
-        const x = lerp(prevOffsetX, offsetX, t);
-        const y = lerp(prevOffsetY, offsetY, t);
-        circle(x, y, circleSize);
-        circle(-x, y, circleSize);
-      }
-
-      circle(accentDistance, 0, circleSize);
-      pop();
-    }
+function mousePressed() {
+  if (!drawingOnCanvas || !mouseIsInsideCanvas()) {
+    return;
   }
 
-  wasMousePressed = mouseIsPressed;
+  gestureColor = color(random(255), random(255), random(255));
+  drawStroke(mouseX, mouseY, mouseX, mouseY);
+}
+
+function mouseDragged() {
+  if (!drawingOnCanvas || !mouseIsInsideCanvas() ||
+      pmouseX < 0 || pmouseX >= width ||
+      pmouseY < 0 || pmouseY >= height) {
+    return;
+  }
+
+  drawStroke(pmouseX, pmouseY, mouseX, mouseY);
+}
+
+function mouseIsInsideCanvas() {
+  return mouseX >= 0 && mouseX < width &&
+    mouseY >= 0 && mouseY < height;
+}
+
+function drawStroke(previousX, previousY, x, y) {
+  push();
+  translate(width / 2, height / 2);
+
+  const offsetX = x - width / 2;
+  const offsetY = y - height / 2;
+  const prevOffsetX = previousX - width / 2;
+  const prevOffsetY = previousY - height / 2;
+
+  stroke(gestureColor);
+  strokeWeight(brushSize);
+
+  const dx = offsetX - prevOffsetX;
+  const dy = offsetY - prevOffsetY;
+  const distance = sqrt(dx * dx + dy * dy);
+  const speed = min(distance, 35) / 35;
+  const circleSize = map(speed, 0, 1, 40, 5, true);
+  const spacing = max(18, circleSize * 1.7);
+  const steps = max(1, floor(distance / spacing));
+
+  for (let i = 0; i < segments; i++) {
+    push();
+    rotate(360 / segments * i);
+
+    const mirroredX = -offsetX;
+    const mirroredPX = -prevOffsetX;
+    const accentDistance = min(width, height) * 0.18;
+
+    line(prevOffsetX, prevOffsetY, offsetX, offsetY);
+    line(mirroredPX, prevOffsetY, mirroredX, offsetY);
+
+    noFill();
+    stroke(red(gestureColor), green(gestureColor), blue(gestureColor), 70);
+
+    for (let s = 0; s <= steps; s++) {
+      const t = s / max(1, steps);
+      const pointX = lerp(prevOffsetX, offsetX, t);
+      const pointY = lerp(prevOffsetY, offsetY, t);
+      circle(pointX, pointY, circleSize);
+      circle(-pointX, pointY, circleSize);
+    }
+
+    circle(accentDistance, 0, circleSize);
+    pop();
+  }
+
+  pop();
 }
 
 function keyPressed() {
