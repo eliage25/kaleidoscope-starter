@@ -4,23 +4,49 @@ let ink = '#7b1ed3';
 let gestureColor = "";
 let wasMousePressed = false;
 let segments = 10;
+let fadeBackground = [15, 15, 10];
+let adjustingSymmetry = false;
 
 function setup() { 
   // cunvas o full available spase in the window
   createCanvas(windowWidth, windowHeight);
-  background(15, 15, 10);
+  background(fadeBackground[0], fadeBackground[1], fadeBackground[2]);
   strokeCap(ROUND);
   angleMode(DEGREES);
+
+  const symmetrySlider = document.getElementById('symmetry-slider');
+  const symmetryControl = document.querySelector('.symmetry-control');
+  const symmetryValue = document.getElementById('symmetry-value');
+  symmetryControl.addEventListener('pointerdown', () => {
+    adjustingSymmetry = true;
+  });
+  window.addEventListener('pointerup', () => {
+    adjustingSymmetry = false;
+  });
+  window.addEventListener('pointercancel', () => {
+    adjustingSymmetry = false;
+  });
+  symmetrySlider.addEventListener('input', () => {
+    segments = Number(symmetrySlider.value);
+    symmetryValue.value = segments;
+  });
 }
  
 function draw() {
+  const fadeAmount = 255 * (1 - Math.pow(0.5, deltaTime / 24000));
+  push();
+  noStroke();
+  fill(fadeBackground[0], fadeBackground[1], fadeBackground[2], fadeAmount);
+  rect(0, 0, width, height);
+  pop();
+
   const insideCanvas = mouseX >= 0 && mouseX < width &&
     mouseY >= 0 && mouseY < height &&
     pmouseX >= 0 && pmouseX < width &&
     pmouseY >= 0 && pmouseY < height;
 
   // Draw only while dragging inside the canvas.
-  if (mouseIsPressed && insideCanvas) {
+  if (mouseIsPressed && !adjustingSymmetry && insideCanvas) {
     if (!wasMousePressed) {
       gestureColor = color(random(255), random(255), random(255));
     }
@@ -76,7 +102,8 @@ function draw() {
 function keyPressed() {
   // Clear the canvas when the user presses 'c' or 'C'.
   if (key === 'c' || key === 'C') {
-    background(12, 15, 24);
+    fadeBackground = [12, 15, 24];
+    background(fadeBackground[0], fadeBackground[1], fadeBackground[2]);
   }
   if (key === 's' || key === 'S') {
     saveCanvas('my-kaleidoscope', 'png');

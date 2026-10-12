@@ -125,6 +125,59 @@
       white-space: nowrap;
     }
 
+    .symmetry-control {
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .symmetry-control label,
+    .symmetry-control output {
+      color: rgb(241 241 237 / 82%);
+      font: inherit;
+    }
+
+    .symmetry-control input {
+      width: 88px;
+      height: 26px;
+      margin: 0;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .symmetry-control input::-webkit-slider-runnable-track {
+      height: 1px;
+      background: rgb(241 241 237 / 38%);
+    }
+
+    .symmetry-control input::-moz-range-track {
+      height: 1px;
+      background: rgb(241 241 237 / 38%);
+    }
+
+    .symmetry-control input::-webkit-slider-thumb {
+      width: 10px;
+      height: 10px;
+      margin-top: -4.5px;
+      appearance: none;
+      border: 1px solid #f1f1ed;
+      border-radius: 50%;
+      background: #0c0f18;
+    }
+
+    .symmetry-control input::-moz-range-thumb {
+      width: 8px;
+      height: 8px;
+      border: 1px solid #f1f1ed;
+      border-radius: 50%;
+      background: #0c0f18;
+    }
+
+    .symmetry-control input:focus-visible {
+      outline: 1px solid rgb(241 241 237 / 68%);
+      outline-offset: 3px;
+    }
+
     kbd {
       display: inline-grid;
       min-width: 26px;
@@ -205,6 +258,11 @@
     <footer class="controls" aria-label="Artwork controls">
       <p class="controls-label">Interact</p>
       <ul class="control-list">
+        <li class="symmetry-control">
+          <label for="symmetry-slider">Symmetry</label>
+          <input id="symmetry-slider" type="range" min="4" max="24" step="1" value="10">
+          <output id="symmetry-value" for="symmetry-slider">10</output>
+        </li>
         <li><kbd aria-label="Mouse drag">↗</kbd><span>Drag to draw</span></li>
         <li><kbd>C</kbd><span>Clear canvas</span></li>
         <li><kbd>S</kbd><span>Save as PNG</span></li>
