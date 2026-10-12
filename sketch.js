@@ -8,7 +8,7 @@ let segments = 10;
 function setup() { 
   // cunvas o full available spase in the window
   createCanvas(windowWidth, windowHeight);
-  background(12, 15, 204);
+  background(12, 15, 200);
   strokeCap(ROUND);
   angleMode(DEGREES);
 }
