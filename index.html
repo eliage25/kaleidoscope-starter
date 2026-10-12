@@ -3,19 +3,214 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>My kaleidoscope</title>
+  <meta name="theme-color" content="#0c0f18">
+  <meta name="description" content="An interactive study in symmetry, gesture, and chance.">
+  <title>Kaleidoscope — Interactive generative artwork</title>
   <style>
-    body { margin: 0; background: #0c0f18; color: #c6c9d4; font: 15px/1.5 system-ui, sans-serif; }
-    header { max-width: 720px; margin: 24px auto 16px; padding: 0 16px; }
-    h1 { font-size: 22px; margin: 0 0 6px; color: #f1f1ed; }
-    p { margin: 0; }
-    main { width: fit-content; margin: 0 auto 24px; }
-    canvas { display: block; max-width: calc(100vw - 32px); height: auto !important; }
+    :root {
+      color-scheme: dark;
+      font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background: #0c0f18;
+      color: #f1f1ed;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .artwork {
+      position: fixed;
+      z-index: 0;
+      inset: 0;
+    }
+
+    canvas {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .interface {
+      position: fixed;
+      z-index: 1;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(24px, 5vw, 72px);
+      pointer-events: none;
+    }
+
+    .interface::before {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      background:
+        linear-gradient(115deg, rgb(12 15 24 / 62%), transparent 58%),
+        linear-gradient(0deg, rgb(12 15 24 / 56%), transparent 32%);
+      content: "";
+    }
+
+    .intro {
+      max-width: 1100px;
+    }
+
+    .eyebrow,
+    .controls-label {
+      margin: 0;
+      color: rgb(241 241 237 / 68%);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 22px 0 0 -0.07em;
+      font-size: clamp(4.5rem, 14vw, 13rem);
+      font-weight: 500;
+      letter-spacing: -0.095em;
+      line-height: 0.76;
+    }
+
+    .description {
+      max-width: 330px;
+      margin: clamp(24px, 4vw, 44px) 0 0;
+      color: rgb(241 241 237 / 82%);
+      font-size: clamp(14px, 1.5vw, 17px);
+      line-height: 1.55;
+    }
+
+    .controls {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .controls-label {
+      flex: 0 0 auto;
+    }
+
+    .control-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 12px 28px;
+      margin: 0;
+      padding: 0;
+      color: rgb(241 241 237 / 82%);
+      font-size: 12px;
+      list-style: none;
+    }
+
+    .control-list li {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      white-space: nowrap;
+    }
+
+    kbd {
+      display: inline-grid;
+      min-width: 26px;
+      min-height: 26px;
+      place-items: center;
+      border: 1px solid rgb(241 241 237 / 38%);
+      border-radius: 50%;
+      color: #f1f1ed;
+      font: inherit;
+      font-size: 11px;
+    }
+
+    @media (max-width: 600px) {
+      .interface {
+        padding: 28px 24px;
+      }
+
+      h1 {
+        margin-top: 24px;
+        font-size: clamp(3.25rem, 14vw, 6.75rem);
+      }
+
+      .description {
+        max-width: 280px;
+      }
+
+      .controls {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .control-list {
+        justify-content: flex-start;
+        gap: 10px 16px;
+      }
+    }
+
+    @media (max-height: 520px) and (max-width: 600px) {
+      .interface {
+        padding-block: 16px;
+      }
+
+      h1 {
+        margin-top: 14px;
+      }
+
+      .description {
+        margin-top: 16px;
+      }
+    }
+
+    @media (max-height: 520px) and (min-width: 601px) {
+      .interface {
+        padding-block: 24px;
+      }
+
+      h1 {
+        margin-top: 12px;
+        font-size: clamp(4rem, 12vh, 7rem);
+      }
+
+      .description {
+        margin-top: 18px;
+      }
+    }
   </style>
 </head>
 <body>
-  <header><h1>My kaleidoscope</h1><p>Drag to draw · C to clear · S to save a PNG</p></header>
-  <main></main>
+  <main class="artwork" aria-label="Kaleidoscope interactive artwork"></main>
+  <section class="interface" aria-label="Artwork title and controls">
+    <header class="intro">
+      <p class="eyebrow">This is · Generative study 01</p>
+      <h1>Kaleidoscope</h1>
+      <p class="description">An interactive study in symmetry, gesture, and chance.</p>
+    </header>
+
+    <footer class="controls" aria-label="Artwork controls">
+      <p class="controls-label">Interact</p>
+      <ul class="control-list">
+        <li><kbd aria-label="Mouse drag">↗</kbd><span>Drag to draw</span></li>
+        <li><kbd>C</kbd><span>Clear canvas</span></li>
+        <li><kbd>S</kbd><span>Save as PNG</span></li>
+      </ul>
+    </footer>
+  </section>
   <script src="libraries/p5.min.js"></script>
   <script src="sketch.js"></script>
 </body>
